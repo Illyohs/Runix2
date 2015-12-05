@@ -84,7 +84,7 @@ This section assumes that you're using the command-line version of Git.
 A PR MUST meet these standards befor being merged:
 
     1: The PR MUST be singed off by the author
-    2: The coding style MUST be uniform with Runix's(LordIllyohs HATES none uniform styles)
+    2: The coding style MUST be uniform with Runix's(Illyohs HATES none uniform styles)
     3: The PR MUST pass a Travis-ci build, if it fails odds are it won't be merged.
         -If you think it should still be merged please give us a GOOD reason to do so.
 

@@ -84,6 +84,18 @@ processResources {
 
 }
 
+repositories {
+    mavenCentral()
+    maven {
+        name "RX14 repo"
+        url "http://mvn.rx14.co.uk/repo/"
+    }
+}
+
+dependencies {
+    compile 'us.illyohs.libilly:LibIlly:1.8.8-0.2.0.32-1.8.8:deobf'
+}
+
 task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
     classifier = 'sources'
