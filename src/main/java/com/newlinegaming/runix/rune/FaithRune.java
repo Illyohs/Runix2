@@ -12,6 +12,8 @@ import com.newlinegaming.runix.block.ModBlock;
 import com.newlinegaming.runix.utils.Util_Movement;
 import com.newlinegaming.runix.utils.Util_SphericalFunctions;
 
+import us.illyohs.libilly.util.BlockUtils;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -50,9 +52,8 @@ public class FaithRune extends PersistentRune{
         if(firstTime){// firstTime prevents players from injecting more energy by building a second rune on top of the first
             firstTime = false;
             consumeRune(coords);
-            try {
-                setBlockIdAndUpdate(coords, ModBlock.fakeGoldBlock); //Gold block is to be a permanent marker
-            } catch (NotEnoughRunicEnergyException e) {}
+            //                setBlockIdAndUpdate(coords, coords.se); //Gold block is to be a permanent marker
+            BlockUtils.replaceBlock(coords.getWorld(), coords, coords.getBlock(), ModBlock.fakeGoldBlock);
             energy -= Tiers.getEnergy(Blocks.gold_block) * 5; //the Gold blocks don't count towards the energy
             radius = Tiers.energyToRadiusConversion(energy);
             HashSet<WorldPos> tsphere = fullStructure();

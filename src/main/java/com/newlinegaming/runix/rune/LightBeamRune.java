@@ -3,11 +3,11 @@ package com.newlinegaming.runix.rune;
 import java.util.HashMap;
 
 import com.newlinegaming.runix.AbstractRune;
-import com.newlinegaming.runix.SigBlock;
 import com.newlinegaming.runix.WorldPos;
 import com.newlinegaming.runix.block.ModBlock;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 
@@ -45,7 +45,7 @@ public class LightBeamRune extends AbstractRune {
         }};
         coords = coords.copyWithNewFacing(1);
         aetherSay(player, "created");
-        HashMap<WorldPos, SigBlock> stamp = patternToShape(outcome, coords);
+        HashMap<WorldPos, IBlockState> stamp = patternToShape(outcome, coords);
         if(stampBlockPattern(stamp, player))
             accept(player);
 

@@ -16,9 +16,12 @@ import com.newlinegaming.runix.rune.WaypointRune;
 import com.newlinegaming.runix.utils.Util_Movement;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
@@ -63,7 +66,7 @@ public abstract class AbstractRune {
 	 * @return WorldXYZ is the coordinates being checked.  Use WorldXYZ.getBlockID().  SigBlock is 
 	 * the runeTemplate for that block, which can be special values like TIER or KEY.
 	 */
-	protected HashMap<WorldPos, SigBlock> runicFormulae(WorldPos coords){
+	protected HashMap<WorldPos, IBlockState> runicFormulae(WorldPos coords){
 	    if(isFlatRuneOnly())
 	        coords = coords.copyWithNewFacing(1); //we need a new object so we don't side-effect other runes
 	    return patternToShape(runicTemplateOriginal(), coords); 
@@ -94,9 +97,9 @@ public abstract class AbstractRune {
 	 * @param worldZ
 	 * @return Returns false if the operation was blocked by build protection.  Currently always true.
 	 */
-	protected boolean stampBlockPattern(HashMap<WorldPos, SigBlock> stamp, EntityPlayer player) {
+	protected boolean stampBlockPattern(HashMap<WorldPos, IBlockState> stamp, EntityPlayer player) {
 		for(WorldPos target : stamp.keySet())
-		    target.setBlockState( stamp.get(target) );
+		    target.setBlockState(stamp.get(target) );
 		return true;
 		//TODO: build permission checking
 	}
@@ -127,15 +130,13 @@ public abstract class AbstractRune {
 		
 	    Vector3 direction = Vector3.facing[coords.face];
 	    for(int tries = 0; tries < 100; ++tries) {
-	        if( (coords.getY() < 255 && coords.getY() > 0) // coords are in bounds
-//	                && coords.getWorld().getBlock(coords.getX(), coords.getY(), coords.getZ()) == Blocks.air
+	        // coords are in bounds
+	        if ((coords.getY() < 255 && coords.getY() > 0)
 	                && coords.getWorld().getBlockState(coords) == Blocks.air
-	                && coords.getWorld().getBlockState(coords.add(0, 1, 0)) == Blocks.air);
-//	                && coords.getWorld().getBlock(coords.posX, coords.posY+1, coords.posZ) == Blocks.air)//two AIR blocks
-	        {  
-	            for(int drop = 1; drop < 20 && coords.posY-drop > 0; ++drop)//less than a 20 meter drop
+	                && coords.getWorld().getBlockState(coords.add(0, 1, 0)) == Blocks.air) {  
+	            for(int drop = 1; drop < 20 && coords.getY()-drop > 0; ++drop)//less than a 20 meter drop
 	            {//begin scanning downward
-	                Block block = coords.getWorld().getBlock(coords.posX, coords.posY - drop, coords.posZ);
+	                Block block = coords.getWorld().getBlockState(new BlockPos(coords.getX(), coords.getY() - drop, coords.getZ())).getBlock();
 	                if(block != Blocks.air)
 	                { //We found something not AIR
     	                if (block == Blocks.lava || block == Blocks.flowing_lava//check for Lava, fire, and void
@@ -145,17 +146,21 @@ public abstract class AbstractRune {
     	                else if(coords.offset(0, -drop, 0).isSolid()){ //we're going to land on something solid, without dying
     	                    //distance should be calculated uses the Nether -> Overworld transform
     	                    WorldPos dCalc = new WorldPos(player);
-    	                    if(player.worldObj.provider.isHellWorld  && !coords.getWorld().provider.isHellWorld){ //leaving the Nether
-    	                        dCalc.posX *= 8;
-    	                        dCalc.posZ *= 8;
-    	                    }else if (!player.worldObj.provider.isHellWorld  && coords.getWorld().provider.isHellWorld){// going to the Nether
-                                dCalc.posX /= 8;
-                                dCalc.posZ /= 8;
+    	                    if(player.worldObj.provider.doesWaterVaporize()  && !coords.getWorld().provider.doesWaterVaporize()){ //leaving the Nether
+    	                        int dCalcX = dCalc.getX();
+    	                        int dCalcZ = dCalc.getZ();
+    	                        dCalcX *= 8;
+    	                        dCalcZ *= 8;
+    	                    } else if (!player.worldObj.provider.doesWaterVaporize()  && coords.getWorld().provider.doesWaterVaporize()){// going to the Nether    	                        
+    	                        int dCalcX = dCalc.getX();
+    	                        int dCalcZ = dCalc.getZ();
+    	                        dCalcX *= 8;
+    	                        dCalcZ *= 8;
     	                    }
     	                    spendEnergy((int)( coords.getDistance(dCalc) * Tiers.movementPerMeterCost));
     
     	                    if(!coords.getWorld().equals(player.worldObj))// && !subject.worldObj.isRemote)
-    	                        player.travelToDimension(coords.getWorld().provider.dimensionId);
+    	                        player.travelToDimension(coords.getDimensionNumber());
     	                    player.setPositionAndUpdate(coords.getX()+0.5, coords.getY(), coords.getZ()+0.5);
     	                    return;
     	                }//we've found something that's not AIR, but it's not dangerous so just pass through it and keep going
@@ -230,7 +235,7 @@ public abstract class AbstractRune {
 	 * @return true if there is a valid match
 	 */
     public WorldPos checkRunePattern(WorldPos coords) {
-        HashMap<WorldPos, SigBlock> shape = runicFormulae(coords);
+        HashMap<WorldPos, IBlockState> shape = runicFormulae(coords);
         if( !isAssymetrical()) {
             if(runeOrientationMatches(coords, shape))
                 return coords;
@@ -238,7 +243,7 @@ public abstract class AbstractRune {
                 return null;
         } else {
             for(int nTurns = 0; nTurns < 4; ++nTurns) {//90 degree turns 
-                HashMap<WorldPos, SigBlock> newShape = Util_Movement.rotateStructureInMemory(shape, coords, nTurns);
+                HashMap<WorldPos, IBlockState> newShape = Util_Movement.rotateStructureInMemory(shape, coords, nTurns);
                 if( runeOrientationMatches(coords, newShape) ){
                     //change coords to be pointing in the detected direction, [array lookup]
                     switch(coords.face){
@@ -259,7 +264,7 @@ public abstract class AbstractRune {
         return null;
     }
 
-    public boolean runeOrientationMatches(WorldPos coords, HashMap<WorldPos, SigBlock> shape) {
+    public boolean runeOrientationMatches(WorldPos coords, HashMap<WorldPos, IBlockState> shape) {
         Block ink = getTierInkBlock(coords);
         if(ink == Blocks.air)
             return false; //Tier blocks cannot be AIR
@@ -267,9 +272,9 @@ public abstract class AbstractRune {
         for (WorldPos target : shape.keySet()) 
         {
             Block blockID = target.getBlock();
-            SigBlock patternID = shape.get(target);
+            IBlockState patternID = shape.get(target);
 //            System.out.println(patternID.blockID + " should be " + blockID);
-            switch(patternID.blockID.getUnlocalizedName())
+            switch(patternID.getBlock().getUnlocalizedName())
             { // Handle special Template Values
                 case "tile.NONE": 
                     if( blockID == ink )
@@ -298,7 +303,7 @@ public abstract class AbstractRune {
         return true;
     }
 
-    private void printPattern(HashMap<WorldPos, SigBlock> shape, WorldPos coords) {
+    private void printPattern(HashMap<WorldPos, IBlockState> shape, WorldPos coords) {
         Vector3[] neighbors = {
                 new Vector3(-1, 0, -1),
                 new Vector3(0 , 0, -1),
@@ -329,7 +334,7 @@ public abstract class AbstractRune {
     }
     
     protected Block getTierInkBlock(WorldPos coords) {
-        HashMap<WorldPos, SigBlock> shape = runicFormulae(coords);
+        HashMap<WorldPos, IBlockState> shape = runicFormulae(coords);
         for (WorldPos target : shape.keySet()) {
             if (shape.get(target).equals(TIER)) {
                 return target.getBlock();
@@ -390,10 +395,10 @@ public abstract class AbstractRune {
      * @param centerPoint
      * @return
      */
-    protected HashMap<WorldPos, SigBlock> patternToShape(Block[][][] pattern, WorldPos centerPoint){
+    protected HashMap<WorldPos, IBlockState> patternToShape(Block[][][] pattern, WorldPos centerPoint){
         // World coordinates + relative offset + half the size of the rune (for middle)
         // "-y" the activation and "center" block for 3D runes is the top layer, at the moment
-        HashMap<WorldPos, SigBlock> shape = new HashMap<WorldPos, SigBlock>();
+        HashMap<WorldPos, IBlockState> shape = new HashMap<WorldPos, IBlockState>();
         for (int y = 0; y < pattern.length; y++) {
             for (int z = 0; z < pattern[y].length; z++) {
                 for (int x = 0; x < pattern[y][z].length; x++) {
@@ -417,7 +422,9 @@ public abstract class AbstractRune {
                             target = centerPoint;
                     }
                     if(pattern[y][z][x] != NONE) { //do not include NONE blocks in the runic template at all.
-                        shape.put(target, new SigBlock(pattern[y][z][x], 0));
+                        shape.put(target, new SigBlock(pattern[y][z][x], 0)); //FIXME: ya I need to work this out
+//                        shape.put(target, new BlockState(patten[], properties));
+//                        shape.put(target, target.getState());
                     }
                 }
             }
@@ -431,7 +438,7 @@ public abstract class AbstractRune {
     protected void consumeRune(WorldPos coords) {
         if(isFlatRuneOnly())
             coords = coords.copyWithNewFacing(1);
-        HashMap<WorldPos, SigBlock> shape = runicFormulae(coords);
+        HashMap<WorldPos, IBlockState> shape = runicFormulae(coords);
         for( WorldPos target : shape.keySet()){
             //for each block, get blockID
             Block blockID = target.getBlock();
@@ -451,19 +458,19 @@ public abstract class AbstractRune {
         System.out.println(getRuneName() + " energy: " + energy);
     }
     
-    public void setBlockIdAndUpdate(WorldPos coords, Block blockID) throws NotEnoughRunicEnergyException {
-        if( blockID == Blocks.air )//this is actually breaking, not paying for air
+    public void setBlockIdAndUpdate(WorldPos coords, Block sourceBlock) throws NotEnoughRunicEnergyException {
+        if( sourceBlock == Blocks.air )//this is actually breaking, not paying for air
             spendEnergy(Tiers.blockBreakCost);
         else
-            spendEnergy(Tiers.getEnergy(blockID));
-        coords.setBlockIdAndUpdate(blockID);
+            spendEnergy(Tiers.getEnergy(sourceBlock.getBlockState().getBlock()));
+        coords.setBlockIdAndUpdate(sourceBlock.getBlockState().getBlock());
     }
 
-    public void setBlockIdAndUpdate(WorldPos destination, SigBlock sourceBlock) throws NotEnoughRunicEnergyException {
-        if( sourceBlock.blockID == Blocks.air )//this is actually breaking, not paying for air
+    public void setBlockIdAndUpdate(WorldPos destination, IBlockState sourceBlock) throws NotEnoughRunicEnergyException {
+        if( sourceBlock.getBlock() == Blocks.air )//this is actually breaking, not paying for air
             spendEnergy(Tiers.blockBreakCost);
         else
-            spendEnergy(Tiers.getEnergy(sourceBlock.blockID));
+            spendEnergy(Tiers.getEnergy(sourceBlock.getBlock()));
         destination.setBlockState(sourceBlock);
     }
     
@@ -481,7 +488,7 @@ public abstract class AbstractRune {
     /**This is a minature convenience version of moveShape(moveMapping) for single blocks
      * @throws NotEnoughRunicEnergyException */
     public void moveBlock(WorldPos coords, WorldPos newPos) throws NotEnoughRunicEnergyException {
-        newPos.setBlockState(coords.getSigBlock());
+        newPos.setBlockState(coords.getState());
         coords.setBlockIdAndUpdate(Blocks.air);
         spendEnergy((int) Tiers.blockMoveCost);
         
@@ -499,6 +506,8 @@ public abstract class AbstractRune {
         return false;
     }
 
+    //Umm forget why is this a thing  lazyness 
+    //is not the answer... except when it is :D unlocalized names are best name
     protected String shortClassName() {
         return this.getClass().toString().replace("class com.newlinegaming.runix.rune.", "");
     }

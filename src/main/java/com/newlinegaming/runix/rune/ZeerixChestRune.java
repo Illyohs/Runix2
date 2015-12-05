@@ -43,6 +43,7 @@ public class ZeerixChestRune extends AbstractTimedRune {
                         try{
                             if(location.getBlock() != Blocks.ender_chest)
                                 setBlockIdAndUpdate(location, Blocks.ender_chest);//charge for a replacement
+//                                setBlockIdAndUpdate(coords, sourceBlock);
                             moveBlock(location, newPos);
                         }catch( NotEnoughRunicEnergyException e){
                             reportOutOfGas(getPlayer());

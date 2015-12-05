@@ -73,6 +73,7 @@ public class WorldPos extends BlockPos {
         return worldObj;
     }
 
+
     public void setWorld(World worldObj) {
         this.worldObj = worldObj;
         dimensionID = getDimensionNumber();
@@ -88,6 +89,7 @@ public class WorldPos extends BlockPos {
         worldObj = MinecraftServer.getServer().worldServerForDimension(dimension);
         // worldObj =
         // FMLServerHandler.instance().getServer().worldServerForDimension(dimension);
+        
         dimensionID = getDimensionNumber();
     }
 
@@ -218,11 +220,11 @@ public class WorldPos extends BlockPos {
         // NOTE: Use last arg 3 if you want a block update.
     }
 
-    public boolean setBlock(Block block, IBlockState state) {
-        if (block == Blocks.bedrock || getBlock() == Blocks.bedrock)
+    public boolean setBlockState(IBlockState state) {
+        if (state.getBlock() == Blocks.bedrock || getBlock() == Blocks.bedrock)
             return false; // You cannot delete or place bedrock
 //        return this.getWorld().setBlock(posX, posY, posZ, blockID, meta, 3);
-        return this.getWorld().setBlockState(new BlockPos(getX(), getX(), getZ()), (IBlockState) block);//TODO: FIX THIS
+        return this.getWorld().setBlockState(new BlockPos(getX(), getX(), getZ()), state);//TODO: FIX THIS
     }
 
     public String toString() {// this is designed to match the GSON output

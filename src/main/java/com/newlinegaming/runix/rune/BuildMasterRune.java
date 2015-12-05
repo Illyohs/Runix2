@@ -8,13 +8,13 @@ import java.util.HashSet;
 import com.newlinegaming.runix.AbstractTimedRune;
 import com.newlinegaming.runix.NotEnoughRunicEnergyException;
 import com.newlinegaming.runix.PersistentRune;
-import com.newlinegaming.runix.SigBlock;
 import com.newlinegaming.runix.Tiers;
 import com.newlinegaming.runix.Vector3;
 import com.newlinegaming.runix.WorldPos;
 import com.newlinegaming.runix.utils.Util_Movement;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 
@@ -35,9 +35,9 @@ public class BuildMasterRune extends AbstractTimedRune {
     protected void poke(EntityPlayer poker, WorldPos coords) {
         toggleDisabled();
         consumeFuelBlock(coords); //this will re-enable it if there's a new fuel block
-        if( !disabled) {
+        if (!disabled) {
             aetherSay(poker, "Builder is active.");
-        }else {
+        } else {
             aetherSay(poker, "Builder is turned off.");
         }
         //this code is a demo of rotation patterns, to use it comment out the lines above
@@ -63,12 +63,13 @@ public class BuildMasterRune extends AbstractTimedRune {
             }
             for(WorldPos origin : buildMapping.keySet()) {
                 WorldPos destination = buildMapping.get(origin);
-                SigBlock sourceBlock = origin.getSigBlock();
+                IBlockState sourceBlock = origin.getState();
                 Block destinationBlock = destination.getBlock();
-                if( !sourceBlock.equals(destinationBlock)) {
+                if(!sourceBlock.equals(destinationBlock)) {
                     if(Tiers.isCrushable(destinationBlock)) {
                         try {
-                            setBlockIdAndUpdate(destination, sourceBlock);//no physics?
+//                            setBlockIdAndUpdate(destination, sourceBlock);//no physics?
+                            setBlockIdAndUpdate(destination, sourceBlock.getBlock());
                         } catch (NotEnoughRunicEnergyException e) {
                             reportOutOfGas(player);
                             return;

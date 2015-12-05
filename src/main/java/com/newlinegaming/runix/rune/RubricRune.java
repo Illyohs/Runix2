@@ -7,12 +7,12 @@ import java.util.HashSet;
 
 import com.newlinegaming.runix.BlockRecord;
 import com.newlinegaming.runix.PersistentRune;
-import com.newlinegaming.runix.SigBlock;
 import com.newlinegaming.runix.Vector3;
 import com.newlinegaming.runix.WorldPos;
 import com.newlinegaming.runix.helper.RenderHelper;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -30,7 +30,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RubricRune extends PersistentRune {
 
 	private static ArrayList<PersistentRune> storedPatterns = new ArrayList<PersistentRune>();
-	public HashMap<Vector3, SigBlock> structure = new HashMap<Vector3, SigBlock>();
+	public HashMap<Vector3, IBlockState> structure = new HashMap<Vector3, IBlockState>();
 	protected transient RenderHelper renderer = null;
 
     public RubricRune() {
@@ -109,19 +109,19 @@ public class RubricRune extends PersistentRune {
     public void unpackStructure(EntityPlayer initiator, WorldPos origin){
         //convert old coordinets to vector3 based on offset from origin
         // create new worldXYZ by adding this.location to each vector3 
-        HashMap<WorldPos, SigBlock> NewStructure = structureAbsoluteLocation(origin);
+        HashMap<WorldPos, IBlockState> NewStructure = structureAbsoluteLocation(origin);
             
         stampBlockPattern(NewStructure, initiator);
         //TODO validate area to stamp
         //catch: need more energy
     }
     
-    private HashMap<Vector3, SigBlock> scanStructure(HashSet<WorldPos> shape) {
-        HashMap<Vector3, SigBlock> fullData = new HashMap<Vector3, SigBlock>();
+    private HashMap<Vector3, IBlockState> scanStructure(HashSet<WorldPos> shape) {
+        HashMap<Vector3, IBlockState> fullData = new HashMap<Vector3, IBlockState>();
         for(WorldPos point : shape){
             if(point.getBlock() != Blocks.air){
                 Vector3 offset = new Vector3(location, point);
-                fullData.put(offset, point.getSigBlock());
+                fullData.put(offset, point.getState());
             }
         }
         return fullData;
@@ -161,8 +161,8 @@ public class RubricRune extends PersistentRune {
     }
    
 
-    public HashMap<WorldPos, SigBlock> structureAbsoluteLocation(WorldPos origin) {
-        HashMap<WorldPos, SigBlock> NewStructure = new HashMap<WorldPos, SigBlock>();
+    public HashMap<WorldPos, IBlockState> structureAbsoluteLocation(WorldPos origin) {
+        HashMap<WorldPos, IBlockState> NewStructure = new HashMap<WorldPos, IBlockState>();
         for(Vector3 relative : structure.keySet()){
             NewStructure.put(origin.offset(relative), structure.get(relative));
         }

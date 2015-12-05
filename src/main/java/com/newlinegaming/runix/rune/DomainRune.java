@@ -35,7 +35,7 @@ public class DomainRune extends AbstractTimedRune {
     }
 
     private void phaseBlockAt(WorldPos coords) {
-        BlockRecord record = new BlockRecord(10, new Vector3(location, coords), coords.getSigBlock());
+        BlockRecord record = new BlockRecord(10, new Vector3(location, coords), coords.getState());
         phasedBlocks.add(record);   
     }
     
@@ -70,8 +70,8 @@ public class DomainRune extends AbstractTimedRune {
     private void unphaseExpiredBlocks() {
         for( BlockRecord expired = phasedBlocks.poll(); expired != null; expired = phasedBlocks.poll()){
             //TODO drop block if non-air block
-            System.out.println(expired.offset.toString() + "  ==  " + expired.block.blockID);
-            location.offset(expired.offset).setBlockIdAndUpdate(expired.block.blockID);
+            System.out.println(expired.offset.toString() + "  ==  " + expired.state.getBlock());
+            location.offset(expired.offset).setBlockIdAndUpdate(expired.state.getBlock());
         }
     }
 

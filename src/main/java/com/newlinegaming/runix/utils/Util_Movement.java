@@ -9,6 +9,7 @@ import com.newlinegaming.runix.*;
 import com.newlinegaming.runix.handlers.RuneHandler;
 import com.newlinegaming.runix.workers.StructureMoveWorker;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 
@@ -29,17 +30,21 @@ public class Util_Movement {
      * moveShape() calls moveMagic() which will update everything including yourself.
      */
     public static HashSet<WorldPos> performMove(HashMap<WorldPos, WorldPos> moveMapping) {
-        SigBlock AIR = new SigBlock(Blocks.air, 0);
-        HashMap<WorldPos, SigBlock> newStructure = new HashMap<WorldPos, SigBlock>();
-        HashMap<WorldPos, SigBlock> sensitiveBlocks = new HashMap<WorldPos, SigBlock>();
-        for(WorldPos point : moveMapping.keySet()){
-            SigBlock block = point.getSigBlock();
-            if( Tiers.isMoveSensitive(block.blockID) ){//we're splitting sensitive blocks into their own set
-                sensitiveBlocks.put(moveMapping.get(point), block);//record at new location
-                point.setBlockState(AIR);//delete sensitive blocks first to prevent drops
-            }
-            else if( !block.equals(Blocks.air)){//don't write AIR blocks
-                newStructure.put(moveMapping.get(point), block);//record original at new location
+        IBlockState AIR = Blocks.air.getDefaultState();
+        HashMap<WorldPos, IBlockState> newStructure = new HashMap<WorldPos, IBlockState>();
+        HashMap<WorldPos, IBlockState> sensitiveBlocks = new HashMap<WorldPos, IBlockState>();
+        for(WorldPos point : moveMapping.keySet()) {
+            IBlockState block = point.getState();
+            //we're splitting sensitive blocks into their own set
+            if (Tiers.isMoveSensitive(block.getBlock())) {
+                //record at new location
+                sensitiveBlocks.put(moveMapping.get(point), block);                
+                //delete sensitive blocks first to prevent drops
+                point.setBlockState(AIR); 
+                //don't write AIR blocks
+            } else if(block.getBlock() == Blocks.air) {
+                //record original at new location
+                newStructure.put(moveMapping.get(point), block);
             }
         }
         
@@ -47,7 +52,8 @@ public class Util_Movement {
             loc.setBlockState(AIR); // delete old block in a separate loop to avoid collisions with the new positioning
 
         for(WorldPos destination : newStructure.keySet()) //place all the blocks at new location
-            destination.setBlockState(newStructure.get(destination));//doesn't include sensitive blocks
+//            destination.setBlockState(newStructure.get(destination));//doesn't include sensitive blocks
+            destination.setBlockState(newStructure.get(destination));
 
         for(WorldPos specialPos : sensitiveBlocks.keySet()) //Place all the sensitive blocks
             specialPos.setBlockState(sensitiveBlocks.get(specialPos));//blocks like torches and redstone
@@ -122,13 +128,13 @@ public class Util_Movement {
     }
 
 
-    public static HashMap<WorldPos, SigBlock> rotateStructureInMemory(HashMap<WorldPos, SigBlock> shape, WorldPos center, int nTurns) {
-        HashMap<WorldPos, SigBlock> startShape = new HashMap<WorldPos, SigBlock>(shape);
+    public static HashMap<WorldPos, IBlockState> rotateStructureInMemory(HashMap<WorldPos, IBlockState> shape, WorldPos center, int nTurns) {
+        HashMap<WorldPos, IBlockState> startShape = new HashMap<WorldPos, IBlockState>(shape);
         
         for(int turnNumber = 0; turnNumber < nTurns; ++turnNumber) {
             HashMap<WorldPos, WorldPos> move = Util_Movement.xzRotation(startShape.keySet(), center, false);
 
-            HashMap<WorldPos, SigBlock> newShape = new HashMap<WorldPos, SigBlock>();//blank variable for swapping purposes
+            HashMap<WorldPos, IBlockState> newShape = new HashMap<WorldPos, IBlockState>();//blank variable for swapping purposes
             for(WorldPos origin : move.keySet()) {
                 WorldPos destination = move.get(origin);
                 newShape.put(destination, startShape.get(origin));
@@ -138,10 +144,10 @@ public class Util_Movement {
         return startShape;
     }
 
-    public static HashMap<WorldPos, SigBlock> scanBlocksInShape(Set<WorldPos> shape) {
-        HashMap<WorldPos, SigBlock> actualBlocks = new HashMap<WorldPos, SigBlock>();
+    public static HashMap<WorldPos, IBlockState> scanBlocksInShape(Set<WorldPos> shape) {
+        HashMap<WorldPos, IBlockState> actualBlocks = new HashMap<WorldPos, IBlockState>();
         for(WorldPos point : shape) {
-            actualBlocks.put(point, point.getSigBlock());
+            actualBlocks.put(point, point.getState());
         }
         return actualBlocks;
     }

@@ -6,17 +6,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import com.newlinegaming.runix.SigBlock;
 import com.newlinegaming.runix.Tiers;
 import com.newlinegaming.runix.Vector3;
 import com.newlinegaming.runix.WorldPos;
 import com.newlinegaming.runix.handlers.RuneHandler;
 import com.newlinegaming.runix.lib.LibConfig;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 
@@ -24,7 +23,7 @@ public class StructureMoveWorker implements IBlockWorker {
 
     private HashMap<WorldPos, WorldPos> moveMapping = null;
     HashSet<WorldPos> newPositions = new HashSet<WorldPos>();
-    HashMap<WorldPos, SigBlock> sensitiveBlocks = null;
+    HashMap<WorldPos, IBlockState> sensitiveBlocks = null;
     private WorldPos bumpedBlock = null;  // created whenever a move collides with itself
     private int currentTimer = 0;
     private int maxTimer = 20; // 20 ticks = 1 second
@@ -34,7 +33,7 @@ public class StructureMoveWorker implements IBlockWorker {
     public StructureMoveWorker(HashMap<WorldPos, WorldPos> moveMap){
         moveMapping = moveMap;
         cursor = moveMapping.entrySet().iterator();
-        sensitiveBlocks = new HashMap<WorldPos, SigBlock>();
+        sensitiveBlocks = new HashMap<WorldPos, IBlockState>();
         searchingForSensitive = true;
         System.out.println("Starting the StructureMoveWorker on" + moveMapping.size());
     }
@@ -44,7 +43,7 @@ public class StructureMoveWorker implements IBlockWorker {
         ++currentTimer;
         if( !isFinished() && currentTimer >= maxTimer){ // called only once per second
             currentTimer = 0;
-            SigBlock AIR = new SigBlock(Blocks.air, 0);
+            IBlockState AIR = Blocks.air.getDefaultState();
             //Step 1: collision
                 //inside safelyTeleportStructure()
             //Step 2: remove sensitive everything
@@ -57,15 +56,15 @@ public class StructureMoveWorker implements IBlockWorker {
                     int sensitiveBlocksFound = 0; //necessary to track the amount of change
                     while(cursor.hasNext()){
                         Entry<WorldPos, WorldPos> move = cursor.next();
-                        SigBlock block = move.getKey().getSigBlock();
-                        while( Tiers.isMoveSensitive(block.blockID) ){//we're splitting sensitive blocks into their own set
+                        IBlockState state = move.getKey().getState();
+                        while (Tiers.isMoveSensitive(state.getBlock())){//we're splitting sensitive blocks into their own set
                             ++sensitiveBlocksFound;
-                            sensitiveBlocks.put(move.getValue(), block);//record at new location
+                            sensitiveBlocks.put(move.getValue(), state);//record at new location
                             move.getKey().setBlockState(AIR);//delete sensitive blocks first to prevent drops
                             //TODO there's a tiny probability of breaking an extended piston
                             //iterate upward for stacks of gravel, sand, stems, tall grass etc.
                             WorldPos up = move.getKey().offset(Vector3.UP);
-                            block = up.getSigBlock();
+                            state = up.getState();
                             if(!moveMapping.containsKey(up)){
                                 break;
                             }
@@ -83,7 +82,7 @@ public class StructureMoveWorker implements IBlockWorker {
                     HashMap<WorldPos, WorldPos> airBlocks = new HashMap<WorldPos, WorldPos>();
                     while(cursor.hasNext()){
                         Entry<WorldPos, WorldPos> move = cursor.next();
-                        SigBlock block = move.getKey().getSigBlock();
+                        IBlockState block = move.getKey().getState();
                         if(block.equals(Blocks.air)) { 
                             airBlocks.put(move.getKey(), move.getValue()); //don't calculate on AIR blocks
                         } else {
@@ -99,7 +98,7 @@ public class StructureMoveWorker implements IBlockWorker {
                         //move those blocks
                     for(WorldPos origin : currentMove.keySet()) { //Do Move
                         WorldPos destination = currentMove.get(origin);
-                        SigBlock block = origin.getSigBlock();
+                        IBlockState block = origin.getState();
                         destination.setBlockState(block);  //set at destination
                         origin.setBlockState(AIR); //delete at origin
                         // TODO: delete old block in a separate loop to avoid collisions with the new positioning

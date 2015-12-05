@@ -10,6 +10,8 @@ import com.newlinegaming.runix.Vector3;
 import com.newlinegaming.runix.WorldPos;
 import com.newlinegaming.runix.utils.Util_SphericalFunctions;
 
+import us.illyohs.libilly.util.BlockUtils;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -27,7 +29,7 @@ public class TorchBearerRune extends AbstractTimedRune {
         updateEveryXTicks(10);
     }
 
-    public TorchBearerRune( WorldPos coords, EntityPlayer activator ) {
+    public TorchBearerRune(WorldPos coords, EntityPlayer activator ) {
         super(coords, activator, "Torch Bearer");
         updateEveryXTicks(10);
     }
@@ -44,13 +46,16 @@ public class TorchBearerRune extends AbstractTimedRune {
                         (world.isDaytime() && world.getLight(new BlockPos(newPos.getX(), newPos.getY()-1, newPos.getZ())) < 4) ||//day time checking == caves
                         (!world.isDaytime() && world.getLightFor(EnumSkyBlock.BLOCK, new BlockPos(newPos.getX(), newPos.getY(), newPos.getZ())) < 4) ))//adjustable
                 { 
-                    try {
-                        setBlockIdAndUpdate(newPos, Blocks.torch);//set torch
+                    //TODO: throw exception
+//                    try {
+//                        setBlockIdAndUpdate(newPos, Blocks.torch);//set torch
+//                        setBlockIdAndUpdate(coords, Block);CV
+                        BlockUtils.replaceBlock(newPos.getWorld(), newPos, Blocks.air, Blocks.torch);
 //                        aetherSay(subject, Integer.toString(world.getBlockLightValue(newPos.posX, newPos.posY, newPos.posZ))+ 
 //                                " light level.  Placing at " + (new Vector3(newPos, location).toString()));
-                    } catch (NotEnoughRunicEnergyException e) {
+//                    } catch (NotEnoughRunicEnergyException e) {
                         reportOutOfGas(getPlayer());
-                    }
+//                    }
                     return; //Light levels don't update til the end of the tick, so we need to exit
                 }
             }

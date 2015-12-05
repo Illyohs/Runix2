@@ -74,7 +74,7 @@ public class GreekFireRune extends AbstractRune {
                 Tiers.blockBreakCost), 0); //radius calculation
         HashSet<WorldPos> shell = Util_SphericalFunctions.getShell(coords, 1);
         for(WorldPos point : shell){
-            point.setBlock(ModBlock.greekFire, newLife);
+            point.setBlockState(ModBlock.greekFire, newLife);
         }
     }
 

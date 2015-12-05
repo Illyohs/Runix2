@@ -3,6 +3,8 @@ package com.newlinegaming.runix;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
+import net.minecraft.block.state.IBlockState;
+
 /**
  *  This class keeps a record of a block at a location so it can be restored after a set delay.
  * It can be used by Domain to rebuild blocks destroyed by Creepers, Endermen or other players.
@@ -23,12 +25,12 @@ import java.util.concurrent.TimeUnit;
 public class BlockRecord implements Delayed {
     public long expirationInMillis = 0; //exact expiration time is set when the object is constructed
     public Vector3 offset;
-    public SigBlock block;
+    public IBlockState state;
     
-    public BlockRecord(int delayInSeconds, Vector3 displacement, SigBlock b){
-        expirationInMillis = System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(delayInSeconds, TimeUnit.SECONDS);
-        offset = displacement;
-        block = b;
+    public BlockRecord(int delayInSeconds, Vector3 displacement, IBlockState state){
+        this.expirationInMillis = System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(delayInSeconds, TimeUnit.SECONDS);
+        this.offset = displacement;
+        this.state  = state;
     }
     
     @Override
