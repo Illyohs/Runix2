@@ -45,7 +45,7 @@ public class RunixMain {
 //        ConfigurationHandler.init(new File(event.getModConfigurationDirectory().getAbsolutePath() + File.separator + LibInfo.MOD_NAME + ".cfg"));
         ModBlock.init();
         ModFluid.init();
-        ModItem.init();
+//        ModItem.init();
     }
     
     @EventHandler

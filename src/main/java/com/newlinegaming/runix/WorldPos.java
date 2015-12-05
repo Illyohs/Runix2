@@ -126,11 +126,15 @@ public class WorldPos extends BlockPos {
      * Similar to offset(), but updates the current instance instead of a new
      * one.
      */
+    //TODO: Check again
     public WorldPos bump(int dX, int dY, int dZ) {
+        
+        int x = getX();
+        int y = getY();
+        int z = getZ();
         x += dX;
         y += dY;
         z += dZ;
-        
         return this;
     }
 
@@ -212,13 +216,14 @@ public class WorldPos extends BlockPos {
         return this.getWorld().setBlockState(new BlockPos(getX(), getY(), getZ()), block.getDefaultState());
     }
 
-    public boolean setBlockState(SigBlock sig) {
-        if (sig.equals(Blocks.bedrock) || getBlock() == Blocks.bedrock)
-            return false; // You cannot delete or place bedrock
-//        return this.getWorld().setBlock(getX(), get, posZ, sig.blockID, sig.meta, 2);
-        return this.getWorld().setBlockState(new BlockPos(getX(), getY(), getZ()), (IBlockState) sig.blockID);
-        // NOTE: Use last arg 3 if you want a block update.
-    }
+    //TODO:Checkout this afain
+//    public boolean setBlockState(SigBlock sig) {
+//        if (sig.equals(Blocks.bedrock) || getBlock() == Blocks.bedrock)
+//            return false; // You cannot delete or place bedrock
+////        return this.getWorld().setBlock(getX(), get, posZ, sig.blockID, sig.meta, 2);
+//        return this.getWorld().setBlockState(new BlockPos(getX(), getY(), getZ()), (IBlockState) sig.blockID);
+//        // NOTE: Use last arg 3 if you want a block update.
+//    }
 
     public boolean setBlockState(IBlockState state) {
         if (state.getBlock() == Blocks.bedrock || getBlock() == Blocks.bedrock)

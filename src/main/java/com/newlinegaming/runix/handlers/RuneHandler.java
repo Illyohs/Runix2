@@ -19,8 +19,6 @@ import com.newlinegaming.runix.rune.ElevatorRune;
 import com.newlinegaming.runix.rune.FaithRune;
 import com.newlinegaming.runix.rune.FerrousWheelRune;
 import com.newlinegaming.runix.rune.FtpRune;
-import com.newlinegaming.runix.rune.GreekFireRune;
-import com.newlinegaming.runix.rune.HoarFrostRune;
 import com.newlinegaming.runix.rune.OracleRune;
 import com.newlinegaming.runix.rune.RunecraftRune;
 import com.newlinegaming.runix.rune.TeleporterRune;
@@ -72,8 +70,8 @@ public class RuneHandler {
         runeRegistry.add(new ZeerixChestRune());
         runeRegistry.add(new FerrousWheelRune());
         runeRegistry.add(new OracleRune());
-        runeRegistry.add(new GreekFireRune());
-        runeRegistry.add(new HoarFrostRune());
+//        runeRegistry.add(new GreekFireRune());
+//        runeRegistry.add(new HoarFrostRune());
         // runeRegistry.add(new DomainRune());
         // runeRegistry.add(new LightBeamRune());
         runeRegistry.add(new ElevatorRune());
@@ -97,7 +95,7 @@ public class RuneHandler {
         // Note: I've noticed that torch RIGHT_CLICK when you can't place a
         // torch only show up client side, not server side
         if (!event.entityPlayer.worldObj.isRemote && event.action == Action.RIGHT_CLICK_BLOCK && event.action != Action.RIGHT_CLICK_AIR) {
-            possibleRuneActivationEvent(event.entityPlayer, new WorldPos(event.entityPlayer.worldObj, event.pos.getX(), event.pos.getY(), event.pos.getZ(), event.face));
+            possibleRuneActivationEvent(event.entityPlayer, new WorldPos(event.entityPlayer.worldObj, event.pos.getX(), event.pos.getY(), event.pos.getZ(), event.face.getIndex()));
         }
     }
 

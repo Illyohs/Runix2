@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import com.google.common.collect.ImmutableMap;
 import com.newlinegaming.runix.block.fake.FuelBlock;
 import com.newlinegaming.runix.block.fake.NoneBlock;
 import com.newlinegaming.runix.block.fake.SignatureBlock;
@@ -16,6 +17,7 @@ import com.newlinegaming.runix.rune.WaypointRune;
 import com.newlinegaming.runix.utils.Util_Movement;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -422,9 +424,10 @@ public abstract class AbstractRune {
                             target = centerPoint;
                     }
                     if(pattern[y][z][x] != NONE) { //do not include NONE blocks in the runic template at all.
-                        shape.put(target, new SigBlock(pattern[y][z][x], 0)); //FIXME: ya I need to work this out
+//                        shape.put(target, new SigBlock(pattern[y][z][x], 0)); 
 //                        shape.put(target, new BlockState(patten[], properties));
 //                        shape.put(target, target.getState());
+                        shape.put(target,  (IBlockState) pattern[y][z][x]);//FIXME: ya I need to work this out
                     }
                 }
             }
