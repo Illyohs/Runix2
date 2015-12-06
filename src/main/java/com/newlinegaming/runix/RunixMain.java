@@ -27,7 +27,7 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 public class RunixMain {
 
     //Tool and armor Materials
-//    public static ArmorMaterial armorRunix = EnumHelper.addArmorMaterial("RUNEIUMARMOR", 30, new int[] { 4, 6, 6, 4 }, 25);
+    public static ArmorMaterial armorRunix = EnumHelper.addArmorMaterial("RUNXIXUMARMOR", "RUNIX", 30, new int[] { 4, 6, 6, 4 }, 25);
 //    public static ArmorMaterial armorArcadian = EnumHelper.addArmorMaterial("ARCADIANARMOR", 50, new int[]{4, 6, 6, 4}, 25);
     public static ToolMaterial toolRunix = EnumHelper.addToolMaterial("RUNEIUMTOOL", 4, 650, 5, 4, 25);
     public static ToolMaterial toolArcadian = EnumHelper.addToolMaterial("ARCADIANARMOR", 4, 800, 5, 6, 25);
