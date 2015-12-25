@@ -1,9 +1,9 @@
-package com.newlinegaming.runix.lib;
+package us.illyohs.runix2.api.energy;
 
 import net.minecraft.block.Block;
 
 /**
- * Plain old Data Struct for the energyRegistry in Tiers.java
+ * Plain old Data Struct for the energyRegistry in Energy.java
  */
 public class BlockDescription
 {

@@ -18,6 +18,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 //    id "net.minecraftforge.gradle.forge" version "2.0.2"
 //}
 
+apply plugin: 'scala'
 ext.configFile = file "build.properties"
 
 configFile.withReader {
@@ -57,6 +58,22 @@ minecraft {
 
     replaceIn "LibIlly.java"
     replace '@VERSION@', project.version
+}
+
+sourceSets {
+    main {
+        scala {
+            srcDir 'common'
+        }
+        resources {
+            srcDir 'resources'
+        }
+    }
+    api {
+        scala {
+            srcDir 'api'
+        }
+    }
 }
 
 processResources {
