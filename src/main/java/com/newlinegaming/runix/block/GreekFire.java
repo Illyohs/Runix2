@@ -2,7 +2,7 @@ package com.newlinegaming.runix.block;
 
 import java.util.HashMap;
 
-import com.newlinegaming.runix.RunixMain;
+import com.newlinegaming.runix.common.Runix;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFire;
@@ -23,7 +23,7 @@ public class GreekFire extends BlockFire {
         super();
         setUnlocalizedName("runix:greekfire");
         setTickRandomly(true);
-        setCreativeTab(RunixMain.TabRunix);
+        setCreativeTab(Runix.TabRunix);
 //        initializeBlock();
     }
 

@@ -1,6 +1,6 @@
 package com.newlinegaming.runix.block;
 
-import com.newlinegaming.runix.RunixMain;
+import com.newlinegaming.runix.common.Runix;
 
 import net.minecraft.block.BlockIce;
 import net.minecraft.entity.player.EntityPlayer;
@@ -14,7 +14,7 @@ public class HoarFrost extends BlockIce {
 //        super("ice", Material.ice, false);
         super();
         setTickRandomly(true);
-        setCreativeTab(RunixMain.TabRunix);
+        setCreativeTab(Runix.TabRunix);
         setHardness(0.5F);
         setStepSound(soundTypeGlass);
         setUnlocalizedName("runix:hoarfrost");
