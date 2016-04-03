@@ -1,22 +1,22 @@
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
         maven {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
         }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
     }
 }
+apply plugin: 'net.minecraftforge.gradle.forge'
 
-apply plugin: 'forge'
-apply plugin: 'maven'
+
+
+//plugins {
+//    id "net.minecraftforge.gradle.forge" version "2.0.2"
+//}
 
 ext.configFile = file "build.properties"
 
@@ -26,113 +26,70 @@ configFile.withReader {
     project.ext.config = new ConfigSlurper().parse prop
 }
 
-def ENV = System.getenv()
-if (ENV.BUILD_ID) {
-	version += "${config.mc_version}-${config.mod_version}.${config.release_status}." + ENV.DRONE_BUILD_NUMBER
-} else {
-	version += "${config.mc_version}-${config.mod_version}.${config.release_status}.local"
+task buildInfo {
+    def cmd = "git rev-parse --short HEAD"
+    def proc = cmd.execute()
+    ext.sha = proc.text.trim()
 }
-group= "${config.group}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+
+task gitbranch {
+    def cmd = "git rev-parse --abbrev-ref HEAD"
+    def proc = cmd.execute()
+    ext.branch = proc.text.trim()
+}
+
+
+if (System.getenv('BUILD_NUMBER') != null) {
+    version = "${config.mc_version}-${config.mod_version}.${System.getenv('BUILD_NUMBER')}"
+} else {
+    version = "${config.mc_version}-${config.mod_version}.local.${project.buildInfo.sha}"
+}
+//version = "${config.mc_version}-${config.mod_version}"
+group= "${config.group}"
 archivesBaseName = "${config.name}"
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
 minecraft {
-	version = "${config.mc_version}-${config.forge_version}"
 
-    replaceIn "lib/LibInfo.java"
-    replace '@VERSION@', "${config.mc_version}-${config.mod_version}"
+    runDir = "run"
+    mappings = "${config.mappings}"
+    version = "${config.mc_version}-${config.forge_version}"
+
+
+    replaceIn "internal/LibIlly.java"
+    replace '@VERSION@', project.version
 }
 
 processResources {
-
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-    
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
-        include '**/*.info'
-                
+        include 'mcmod/info'
+
         // replace version and mcversion
-        expand 'mod_version':project.version, 'minecraft_version':project.minecraft.version
+        expand 'version':project.version, 'mcversion':project.minecraft.version
     }
-        
+
     // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
-        exclude '**/*.info'
+        exclude 'mcmod.info'
     }
 
-    task deobfJar(type: Jar) {
-        from sourceSets.main.output
-        classifier = 'DEV'
-    }
-
-    artifacts {
-        archives deobfJar
-    }
 }
 
-configurations {
-    deployerJars
+task sourcesJar(type: Jar, dependsOn: classes) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    classifier = 'deobf'
+}
+
+artifacts {
+    archives deobfJar
+    archives sourcesJar
 }
 
 repositories {
     mavenCentral()
-}
-
-dependencies {
-    deployerJars "org.apache.maven.wagon:wagon-ssh:2.2"
-}
-
-if (ENV.SC_MAVEN_URL) {
-	uploadArchives {
-		repositories.mavenDeployer {
-			configuration = configurations.deployerJars
-			repository(url: ENV.SC_MAVEN_URL) {
-				authentication(userName: ENV.SC_MAVEN_USER, password: ENV.SC_MAVEN_PASS)
-			}
-			
-			pom {
-				groupId = project.group
-				version = project.version
-				artifactId = project.archivesBaseName
-				project {
-					name project.archivesBaseName
-					packaging 'jar'
-					description 'Runix'
-					url 'https://github.com/Runix-Minecraft/Runix'
-					
-						 scm {
-						 	url 'https://github.com/Runix-Minecraft/Runix'
-                            connection 'scm:git:git://github.com/Runix-Minecraft/Runix.git'
-                            developerConnection 'scm:git:git@github.com:Runix-Minecraft/Runix.git'
-                        }
-                        
-                        issueManagement {
-                            system 'github'
-                            url 'https://github.com/Runix-Minecraft/Runix/issues'
-                        }
-                        
-                        developers {
-                            developer {
-                                id 'josiahseaman'
-                                name 'Josiah Seaman'
-                                roles { role 'developer' }
-                            }
-                            developer {
-                                id 'LordIllyohs'
-                                name 'Anthony Anderson'
-                                roles { role 'developer' }
-                            }
-                            developer {
-                            	id 'RivkiinShadows'
-                            	name 'Rivkiin Shadows'
-                            	roles {role 'developer'}
-                            }
-                        }
-				}
-			}
-		}
-	}
 }
