@@ -8,7 +8,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 
 import com.newlinegaming.runix.BaseRune;
-import com.newlinegaming.runix.SigBlock;
 import com.newlinegaming.runix.block.ModBlock;
 
 public class LightBeamRune extends BaseRune {

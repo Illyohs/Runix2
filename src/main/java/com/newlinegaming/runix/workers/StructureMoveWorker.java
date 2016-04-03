@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import com.newlinegaming.runix.WorldPos;
 import net.minecraft.init.Blocks;
 
-import com.newlinegaming.runix.SigBlock;
 import com.newlinegaming.runix.Tiers;
 import com.newlinegaming.runix.Vector3;
 import com.newlinegaming.runix.handlers.RuneHandler;

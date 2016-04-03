@@ -19,7 +19,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import com.newlinegaming.runix.RunixMain;
-import com.newlinegaming.runix.SigBlock;
 import com.newlinegaming.runix.Vector3;
 import com.newlinegaming.runix.lib.LibInfo;
 

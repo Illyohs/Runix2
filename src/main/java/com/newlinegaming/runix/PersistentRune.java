@@ -13,21 +13,19 @@ import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent.Load;
 import net.minecraftforge.event.world.WorldEvent.Save;
 
+import net.minecraftforge.fml.server.FMLServerHandler;
 import org.apache.commons.io.FileUtils;
 
 import com.google.gson.Gson;
 import com.newlinegaming.runix.handlers.RuneHandler;
 import com.newlinegaming.runix.helper.LogHelper;
 import com.newlinegaming.runix.utils.Util_Movement;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public abstract class PersistentRune extends BaseRune {
 
@@ -52,7 +50,7 @@ public abstract class PersistentRune extends BaseRune {
 	public void saveActiveRunes(Save saveEvent) {
 		if(getActiveMagic().isEmpty())
 			return;
-		String fileName = getJsonFilePath(saveEvent.world);//  ex:TorcherBearerRune.json
+		String fileName = getJsonFilePath(saveEvent.getWorld());//  ex:TorcherBearerRune.json
 		try {
 			PrintWriter file = new PrintWriter(fileName);
 			Gson converter = new Gson();
@@ -70,7 +68,7 @@ public abstract class PersistentRune extends BaseRune {
 	}
 
 	public void loadRunes(Load loadEvent) {
-		String fileName = getJsonFilePath(loadEvent.world);
+		String fileName = getJsonFilePath(loadEvent.getWorld());
 		try {
 			ArrayList<PersistentRune> newList = new ArrayList<PersistentRune>();
 			List<String> json = FileUtils.readLines(new File(fileName));
@@ -99,7 +97,7 @@ public abstract class PersistentRune extends BaseRune {
 		
 		try {
 //			Class
-			String subDirectory = ( MinecraftServer.getServer() instanceof DedicatedServer )? "" : "saves/";
+			String subDirectory = ( FMLServerHandler.instance().getServer() instanceof DedicatedServer )? "" : "saves/";
 			directory = subDirectory + levelName + "/stored_runes/";
 			
 			
@@ -190,7 +188,7 @@ public abstract class PersistentRune extends BaseRune {
 	 * the rune is first created and every time after that as well.  Functionality that you want to call when the
 	 * rune is built and also later whenever it is poked should be placed in this method, not in the constructor.
 	 * Remember, poke will always be called after a rune is created through PersistentRune.execute()
-	 * @param poker Player that poked the rune
+	 * @param player Player that poked the rune
 	 * @param coords center block
 	 */
 	protected void poke(EntityPlayer player, WorldPos coords){
@@ -223,7 +221,7 @@ public abstract class PersistentRune extends BaseRune {
 	 */
 	@Override
 	protected void accept(EntityPlayer player) {
-		aetherSay(player, EnumChatFormatting.GREEN + getRuneName()+"_"+ getActiveMagic().size() + " Accepted.");
+		aetherSay(player, TextFormatting.GREEN + getRuneName()+"_"+ getActiveMagic().size() + " Accepted.");
 	}
 
 	@Override
@@ -287,7 +285,7 @@ public abstract class PersistentRune extends BaseRune {
 
     public EntityPlayer getPlayer() {
 	try {
-	    for (Object playerObj : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
+	    for (Object playerObj : FMLServerHandler.instance().getServer().getPlayerList().getAllProfiles()) {
 		if (((EntityPlayer) playerObj).getUniqueID().equals(uuid))
 		    return (EntityPlayer) playerObj;
 	    }

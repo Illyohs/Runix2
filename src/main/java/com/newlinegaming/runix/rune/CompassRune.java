@@ -3,7 +3,6 @@ package com.newlinegaming.runix.rune;
 import java.util.HashMap;
 
 import com.newlinegaming.runix.BaseRune;
-import com.newlinegaming.runix.SigBlock;
 import com.newlinegaming.runix.WorldPos;
 
 import net.minecraft.block.Block;

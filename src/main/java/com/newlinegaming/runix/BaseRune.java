@@ -62,7 +62,7 @@ public abstract class BaseRune {
 	 * @return WorldPos is the coordinates being checked.  Use WorldPos.getBlockID().  SigBlock is
 	 * the runeTemplate for that block, which can be special values like TIER or KEY.
 	 */
-	protected HashMap<WorldPos, SigBlock> runicFormulae(WorldPos coords){
+	protected HashMap<WorldPos, IBlockState> runicFormulae(WorldPos coords){
 	    if(isFlatRuneOnly())
 	        coords = coords.copyWithNewFacing(1); //we need a new object so we don't side-effect other runes
 	    return patternToShape(runicTemplateOriginal(), coords); 
@@ -295,7 +295,7 @@ public abstract class BaseRune {
         return true;
     }
 
-    private void printPattern(HashMap<WorldPos, SigBlock> shape, WorldPos coords) {
+    private void printPattern(HashMap<WorldPos, IBlockState> shape, WorldPos coords) {
         Vector3[] neighbors = {
                 new Vector3(-1, 0, -1),
                 new Vector3(0 , 0, -1),
@@ -326,7 +326,7 @@ public abstract class BaseRune {
     }
     
     protected Block getTierInkBlock(WorldPos coords) {
-        HashMap<WorldPos, SigBlock> shape = runicFormulae(coords);
+        HashMap<WorldPos, IBlockState> shape = runicFormulae(coords);
         for (WorldPos target : shape.keySet()) {
             if (shape.get(target).equals(TIER)) {
                 return target.getBlock();
