@@ -10,7 +10,7 @@ public class RuneTimer {
     private int currentTimer = 0;
     private int maxTimer = 20;
 
-    RuneTimer(BaseTimedRune r, int waitTicks){
+    RuneTimer(BaseTimedRune r, int waitTicks) {
         rune = r;
         currentTimer = 0;
         maxTimer = waitTicks;
@@ -26,10 +26,6 @@ public class RuneTimer {
     		}
 
     	}
-    }
-    
-    public String getLabel() {
-        return null;
     }
     
 }

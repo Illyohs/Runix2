@@ -9,6 +9,7 @@ import com.newlinegaming.runix.*;
 import com.newlinegaming.runix.handlers.RuneHandler;
 import com.newlinegaming.runix.workers.StructureMoveWorker;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 
@@ -29,14 +30,13 @@ public class Util_Movement {
      * moveShape() calls moveMagic() which will update everything including yourself.
      */
     public static HashSet<WorldPos> performMove(HashMap<WorldPos, WorldPos> moveMapping) {
-        SigBlock AIR = new SigBlock(Blocks.air, 0);
-        HashMap<WorldPos, SigBlock> newStructure = new HashMap<WorldPos, SigBlock>();
-        HashMap<WorldPos, SigBlock> sensitiveBlocks = new HashMap<WorldPos, SigBlock>();
+        HashMap<WorldPos, IBlockState> newStructure = new HashMap<WorldPos, IBlockState>();
+        HashMap<WorldPos, IBlockState> sensitiveBlocks = new HashMap<WorldPos, IBlockState>();
         for(WorldPos point : moveMapping.keySet()){
-            SigBlock block = point.getSigBlock();
-            if( Tiers.isMoveSensitive(block.blockID) ){//we're splitting sensitive blocks into their own set
+            IBlockState block = point.getBlock();
+            if( Tiers.isMoveSensitive(block.getBlock()) ){//we're splitting sensitive blocks into their own set
                 sensitiveBlocks.put(moveMapping.get(point), block);//record at new location
-                point.setBlockId(AIR);//delete sensitive blocks first to prevent drops
+                point.setBlock(Blocks.air);//delete sensitive blocks first to prevent drops
             }
             else if( !block.equals(Blocks.air)){//don't write AIR blocks
                 newStructure.put(moveMapping.get(point), block);//record original at new location
@@ -44,10 +44,10 @@ public class Util_Movement {
         }
         
         for(WorldPos loc : moveMapping.keySet()) //Delete everything
-            loc.setBlockId(AIR); // delete old block in a separate loop to avoid collisions with the new positioning
+            loc.setBlock(Blocks.air); // delete old block in a separate loop to avoid collisions with the new positioning
 
         for(WorldPos destination : newStructure.keySet()) //place all the blocks at new location
-            destination.setBlockId(newStructure.get(destination));//doesn't include sensitive blocks
+            destination.setBlock(newStructure.get(destination));//doesn't include sensitive blocks
 
         for(WorldPos specialPos : sensitiveBlocks.keySet()) //Place all the sensitive blocks
             specialPos.setBlockId(sensitiveBlocks.get(specialPos));//blocks like torches and redstone
