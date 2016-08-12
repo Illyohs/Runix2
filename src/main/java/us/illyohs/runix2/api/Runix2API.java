@@ -19,8 +19,6 @@ public class Runix2API
     public static IForgeRegistry<Rune>  RUNE = GameRegistry.findRegistry(Rune.class);
 
 
-
-
     public static void addEnergy(Block block, int value, boolean natural, boolean crushable, boolean sensitive)
     {
         energyRegistry.put(block, new Energy(block, value, natural, crushable, sensitive));
